@@ -1,0 +1,4 @@
+[DEFAULT]
+list = web-app,web-api
+web-app = /var/www/vhosts/application/src
+web-api = /var/www/vhosts/api/src
