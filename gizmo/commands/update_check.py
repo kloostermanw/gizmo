@@ -1,4 +1,4 @@
-from Commands.update import Update
+from commands.update import Update
 
 # pip install gitpython
 import git

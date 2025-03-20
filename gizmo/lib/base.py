@@ -23,7 +23,7 @@ class Base():
     def getVersion():
         baseDir = os.path.dirname(os.path.realpath(__file__))
         version = ''
-        with open(baseDir + '/../VERSION') as f:
+        with open(baseDir + '/../../VERSION') as f:
             version = f.readline().strip('\n')
         
         return version

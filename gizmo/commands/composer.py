@@ -1,4 +1,4 @@
-from Commands.command import Command
+from commands.command import Command
 import configparser
 from subprocess import call
 

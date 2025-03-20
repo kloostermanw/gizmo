@@ -1,4 +1,4 @@
-from Commands.command import Command
+from commands.command import Command
 
 class Wiebe(Command):
 

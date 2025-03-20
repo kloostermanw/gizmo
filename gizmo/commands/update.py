@@ -1,5 +1,5 @@
-from Commands.command import Command
-from Lib.base import Base
+from commands.command import Command
+from lib.base import Base
 
 # pip install gitpython
 import git
