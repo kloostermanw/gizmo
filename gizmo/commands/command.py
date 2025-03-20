@@ -78,3 +78,8 @@ class Command:
         if strCmd != 'none':
             process = subprocess.Popen(arrCmdAndArgs, shell=False)
             process.communicate()
+
+    def checkPing(self, hostname):
+        response = os.system("ping -c 1 " + hostname)
+        
+        return response == 0

@@ -9,7 +9,7 @@ class Composer(Command):
 
     def configure(self):
         self.name = "celery:composer";
-        self.description = "Run composer command";
+        self.description = "Runs composer command in give repo.";
         self.config = "composer";
 
     def handle(self, args):
@@ -17,6 +17,11 @@ class Composer(Command):
         default = config['DEFAULT'];
     
         list = default.get('list').split(',');
+        hostname = default.get('hostname');
+
+        if not self.checkPing(hostname):
+            print(hostname + ' replies not on ping.')
+            exit(0)
 
         # Extract --repo value
         repo = next((item.split('=')[1] for item in args if item.startswith('--repo=')), None);   
@@ -32,7 +37,6 @@ class Composer(Command):
             dir = default.get(repo);
         
             if dir != None:
-                hostname = 'pg.celery.loc'
                 arguments = result = ' '.join(args)
                 parameters = ['-t', '-o', 'LogLevel=QUIET', hostname, "cd " + dir + "; composer " + arguments]
                 output = self.runCmdRealTime('ssh', parameters);

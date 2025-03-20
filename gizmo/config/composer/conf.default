@@ -2,6 +2,7 @@
 # create conf for your own settings.
 #
 [DEFAULT]
+hostname = pg.celery.loc
 list = web-app,web-api
 web-app = /var/www/vhosts/application/src
 web-api = /var/www/vhosts/api/src
