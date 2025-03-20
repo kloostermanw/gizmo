@@ -1,3 +1,6 @@
+# This file will be overwritten with an update
+# create conf for your own settings.
+#
 [DEFAULT]
 list = web-app,web-api
 web-app = /var/www/vhosts/application/src
