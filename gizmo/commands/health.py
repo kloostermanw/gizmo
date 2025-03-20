@@ -7,7 +7,7 @@ class Health(Command):
 
     def configure(self):
         self.name = "celery:health";
-        self.description = "check the health of the current celery environment.";
+        self.description = "Check the health of the current celery environment.";
         self.config = "health";
 
     def handle(self, args):

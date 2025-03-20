@@ -7,7 +7,7 @@ class RenameMigration(Command):
 
     def configure(self):
         self.name = "celery:rename-migration";
-        self.description = "renames migration files in celery web-app";
+        self.description = "Renames migration files in celery web-app.";
     
     def rename(self, file, oldName, newName):
         fin = open(file, "rt")
