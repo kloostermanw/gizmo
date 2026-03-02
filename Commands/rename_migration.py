@@ -119,7 +119,7 @@ class RenameMigration(Command):
         repo.index.add(file2)
 
         # Create Fixup commit, for the
-        repo.git.commit('--fixup', hash)
+        repo.git.commit('--fixup', hash, "--no-verify")
 
         # Set rebase point 1 commit before the commit with the hash.    
         autosquash_base = hash + '~1'
