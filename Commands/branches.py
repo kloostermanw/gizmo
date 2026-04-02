@@ -27,11 +27,15 @@ class Branches(Command):
             reviewers = ''
 
             match = re.match(r'^feature/issue-(\d+)', branch)
+            project_name = ''
+            project_status = ''
+
             if match:
                 issue_number = match.group(1)
                 issue = self.fetchIssue(issue_number)
                 if issue:
                     issue_state = issue.get('state', '')
+                    project_name, project_status = self.extractProject(issue)
 
             pr_number = ''
             pr = pr_by_branch.get(branch)
@@ -40,7 +44,7 @@ class Branches(Command):
                 pr_state = pr.get('state', '')
                 reviewers = self.formatReviewers(pr)
 
-            rows.append((branch, issue_state, pr_number, pr_state, reviewers))
+            rows.append((branch, issue_state, pr_number, pr_state, reviewers, project_name, project_status))
 
         self.printTable(rows, prs)
 
@@ -59,7 +63,7 @@ class Branches(Command):
     def fetchIssue(self, number):
         try:
             result = subprocess.run(
-                ['gh', 'issue', 'view', str(number), '--json', 'state,assignees'],
+                ['gh', 'issue', 'view', str(number), '--json', 'state,assignees,projectItems'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
             )
             if result.returncode == 0:
@@ -67,6 +71,15 @@ class Branches(Command):
         except FileNotFoundError:
             pass
         return None
+
+    def extractProject(self, issue):
+        items = issue.get('projectItems', [])
+        if items:
+            first = items[0]
+            name = first.get('project', {}).get('title', '') if isinstance(first.get('project'), dict) else first.get('title', '')
+            status = first.get('status', {}).get('name', '') if isinstance(first.get('status'), dict) else ''
+            return name, status
+        return '', ''
 
     def formatReviewers(self, pr):
         reviewers = {}
@@ -127,8 +140,18 @@ class Branches(Command):
             return colored(state, color)
         return state
 
+    def colorProjectStatus(self, status):
+        colors = {
+            'Done': 'green',
+            'In Progress': 'yellow',
+            'In Review': 'cyan',
+            'Todo': 'white',
+        }
+        color = colors.get(status, 'white')
+        return colored(status, color)
+
     def printTable(self, rows, prs):
-        headers = ('branch', 'issue', 'pr', 'status', 'reviewers')
+        headers = ('branch', 'issue', 'pr', 'status', 'reviewers', 'project', 'proj status')
         padding = 2
 
         widths = [len(h) for h in headers]
@@ -146,13 +169,15 @@ class Branches(Command):
 
         pr_by_branch = {pr['headRefName']: pr for pr in prs}
 
-        for branch, issue_state, pr_number, pr_state, reviewers_plain in rows:
+        for branch, issue_state, pr_number, pr_state, reviewers_plain, project_name, project_status in rows:
             pr = pr_by_branch.get(branch)
             cols = [
                 colored(branch.ljust(widths[0]), 'white'),
                 self.colorState(issue_state.ljust(widths[1])) if issue_state else ' ' * widths[1],
                 colored(pr_number.ljust(widths[2]), 'white') if pr_number else ' ' * widths[2],
                 self.colorState(pr_state.ljust(widths[3])) if pr_state else ' ' * widths[3],
-                self.colorReviewers(pr) if pr and reviewers_plain else '',
+                (self.colorReviewers(pr) + ' ' * (widths[4] - len(reviewers_plain))) if pr and reviewers_plain else ' ' * widths[4],
+                colored(project_name.ljust(widths[5]), 'cyan') if project_name else ' ' * widths[5],
+                self.colorProjectStatus(project_status) if project_status else '',
             ]
             print(''.join(cols).rstrip())
