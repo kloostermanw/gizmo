@@ -46,7 +46,8 @@ class Branches(Command):
 
             rows.append((branch, issue_state, pr_number, pr_state, reviewers, project_name, project_status))
 
-        self.printTable(rows, prs)
+        repo_url = self.getRepoUrl()
+        self.printTable(rows, prs, repo_url)
 
     def fetchPRs(self):
         try:
@@ -129,6 +130,21 @@ class Branches(Command):
 
         return ', '.join(parts)
 
+    def getRepoUrl(self):
+        try:
+            result = subprocess.run(
+                ['gh', 'repo', 'view', '--json', 'url', '-q', '.url'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
+            )
+            if result.returncode == 0:
+                return result.stdout.decode('utf-8').strip()
+        except FileNotFoundError:
+            pass
+        return ''
+
+    def hyperlink(self, url, text):
+        return f'\033]8;;{url}\033\\{text}\033]8;;\033\\'
+
     def colorState(self, state):
         colors = {
             'OPEN': 'green',
@@ -150,7 +166,7 @@ class Branches(Command):
         color = colors.get(status, 'white')
         return colored(status, color)
 
-    def printTable(self, rows, prs):
+    def printTable(self, rows, prs, repo_url=''):
         headers = ('branch', 'issue', 'pr', 'status', 'reviewers', 'project', 'proj status')
         padding = 2
 
@@ -171,10 +187,29 @@ class Branches(Command):
 
         for branch, issue_state, pr_number, pr_state, reviewers_plain, project_name, project_status in rows:
             pr = pr_by_branch.get(branch)
+
+            # Branch with clickable issue number
+            issue_match = re.match(r'^(feature/issue-)(\d+)(.*)', branch)
+            if issue_match and repo_url:
+                prefix = issue_match.group(1)
+                number = issue_match.group(2)
+                suffix = issue_match.group(3)
+                branch_display = colored(prefix, 'white') + self.hyperlink(repo_url + '/issues/' + number, colored(number, 'white')) + colored(suffix, 'white') + ' ' * (widths[0] - len(branch))
+            else:
+                branch_display = colored(branch.ljust(widths[0]), 'white')
+
+            # PR number with clickable link
+            pr_display = ' ' * widths[2]
+            if pr_number:
+                pr_linked = colored(pr_number, 'white')
+                if pr and repo_url:
+                    pr_linked = self.hyperlink(repo_url + '/pull/' + str(pr.get('number', '')), pr_linked)
+                pr_display = pr_linked + ' ' * (widths[2] - len(pr_number))
+
             cols = [
-                colored(branch.ljust(widths[0]), 'white'),
+                branch_display,
                 self.colorState(issue_state.ljust(widths[1])) if issue_state else ' ' * widths[1],
-                colored(pr_number.ljust(widths[2]), 'white') if pr_number else ' ' * widths[2],
+                pr_display,
                 self.colorState(pr_state.ljust(widths[3])) if pr_state else ' ' * widths[3],
                 (self.colorReviewers(pr) + ' ' * (widths[4] - len(reviewers_plain))) if pr and reviewers_plain else ' ' * widths[4],
                 colored(project_name.ljust(widths[5]), 'cyan') if project_name else ' ' * widths[5],
