@@ -24,20 +24,24 @@ class Composer(Command):
         # Remove all items starting with '--repo'
         args = [item for item in args if not item.startswith('--repo')];
 
-        if repo in list:
-            if(len(args) == 0):
-                print('no arguments given for composer.')
-                exit(0)
-
-            dir = default.get(repo);
-        
-            if dir != None:
-                hostname = 'pg.celery.loc'
-                arguments = result = ' '.join(args)
-                parameters = ['-t', '-o', 'LogLevel=QUIET', hostname, "cd " + dir + "; composer " + arguments]
-                output = self.runCmdRealTime('ssh', parameters);
-
-                print(output)
-        else:
-            print('no repo given.')
+        if repo not in list:
+            if repo is None:
+                print('no repo given.')
+            else:
+                print('unknown repo: ' + repo)
+            print('available repos: ' + ', '.join(list))
             exit(0)
+
+        if(len(args) == 0):
+            print('no arguments given for composer.')
+            exit(0)
+
+        dir = default.get(repo);
+
+        if dir != None:
+            hostname = 'pg.celery.loc'
+            arguments = result = ' '.join(args)
+            parameters = ['-t', '-o', 'LogLevel=QUIET', hostname, "cd " + dir + "; composer " + arguments]
+            output = self.runCmdRealTime('ssh', parameters);
+
+            print(output)
