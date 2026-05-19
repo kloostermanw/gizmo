@@ -9,3 +9,9 @@ avatar = ~/repos/celery-avatar
 my = ~/repos/celery-my
 developers = ~/repos/celery-developers-website
 cp = ~/repos/celery-control-panel
+
+vagrant.web-app = /var/www/vhosts/application/src
+vagrant.web-api = /var/www/vhosts/api/src
+vagrant.avatar = /var/www/vhosts/avatar/src
+vagrant.my = /var/www/vhosts/my-celery/src
+vagrant.developers = /var/www/vhosts/developers/src

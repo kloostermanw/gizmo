@@ -1,0 +1,13 @@
+# This file will be overwritten with an update
+# create conf for your own settings.
+#
+# Commands are run in parallel from the git root directory.
+# Each command key must be listed in the comma-separated "list" value.
+# The value is the full command to execute (run from <git-root>/src/).
+#
+[DEFAULT]
+list = test,phpstan,cs-fixer,rector
+test = cely test
+phpstan = vendor/bin/phpstan analyse --memory-limit=3G
+cs-fixer = vendor/bin/php-cs-fixer fix -v
+rector = vendor/bin/rector process

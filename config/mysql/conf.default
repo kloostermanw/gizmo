@@ -1,0 +1,26 @@
+# This file will be overwritten with an update.
+# Create conf in this directory for your own profiles.
+#
+# Each section is a profile name, e.g. [pg.celery.loc].
+#
+# SSH keys (ssh.server, ssh.port, ssh.user, ssh.key) are all optional.
+# When ssh.server is empty, mysql runs directly from your machine.
+# When ssh.server is set, mysql runs on the remote host.
+#
+# ssh.key may be left empty to fall back on your ~/.ssh/config.
+# ssh.key may be a filename (resolved under ~/.ssh/) or an absolute path.
+#
+# mysql.password accepts either a literal value or a 1Password secret
+# reference like "op://Vault/Item/password" which is resolved via the
+# `op` CLI at query time. Requires `op` to be installed and signed in.
+
+[pg.celery.loc]
+ssh.server = pg.celery.loc
+ssh.port = 22
+ssh.user = vagrant
+ssh.key =
+mysql.host = 10.10.10.20
+mysql.port = 3306
+mysql.user = celery
+mysql.password = uqo)i/QhUH7DBaKAUnJy
+mysql.database = tenant
