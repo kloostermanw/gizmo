@@ -17,15 +17,38 @@ editor = none
 
 # The edit will load the following file
 # and this file will commited in the release branch
-# filename = none | CHANGELOG.md
-filename = VERSION
+# cmd1_filename = none | CHANGELOG.md
+cmd1_filename = VERSION
 
-# file_commit_message
-file_commit_message = New Version
+# cmd1_commit_message
+cmd1_commit_message = none
 
-# cmd2 that runs after release is pushed to origin
+# cmd2 that runs after cmd1
+# cmd2 = none
 cmd2 = none
 
 # cmd2_arguments belong by cmd2
-# cmd2_arguments = none | --from {current_release} --release {new_release}
+# cmd2_arguments = none
 cmd2_arguments = none
+
+# The edit will load the following file
+# and this file will commited in the release branch
+# cmd2_filename = none
+cmd2_filename = none
+
+# cmd2_commit_message
+cmd2_commit_message = docs: update RELEASE_NOTES
+
+# cmd3 that runs after release is pushed to origin
+cmd3 = none
+
+# cmd3_arguments belong by cmd3
+# cmd3_arguments = none | --from {current_release} --release {new_release}
+cmd3_arguments = none
+
+# cmd4 that runs after release is pushed to origin
+cmd4 = none
+
+# cmd4_arguments belong by cmd4
+# cmd4_arguments = none
+cmd4_arguments = none
