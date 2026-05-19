@@ -14,4 +14,5 @@ vagrant.web-app = /var/www/vhosts/application/src
 vagrant.web-api = /var/www/vhosts/api/src
 vagrant.avatar = /var/www/vhosts/avatar/src
 vagrant.my = /var/www/vhosts/my-celery/src
+vagrant.cp = /var/www/vhosts/control-panel/src
 vagrant.developers = /var/www/vhosts/developers/src
