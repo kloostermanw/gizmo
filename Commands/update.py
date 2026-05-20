@@ -1,66 +1,34 @@
+import os
+import sys
+
 from Commands.command import Command
 from Lib.base import Base
+from Lib.updater import Updater
 
-# pip install gitpython
-import git
-import os
 
 class Update(Command):
 
     def configure(self):
-        self.name = "update:now";
-        self.description = "Update Gizmo";
+        self.name = "update:now"
+        self.description = "Update Gizmo"
+        self.config = "update"
 
     def handle(self, args):
-        blnValue = self.updatesAvailable()
-        if blnValue:
-            self.update()
+        baseDir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + '/..')
+        updater = Updater(baseDir)
 
-    def update(self):
-        repo = self.getRepo()
-        o = repo.remotes.origin
-        o.pull("--rebase")
+        local = Base.getVersion()
+        available, remote = updater.runForcedCheck()
 
-    def updatesAvailable(self):
-        repo_url = 'https://github.com/kloostermanw/gizmo.git'
-        
-        blob = git.cmd.Git().ls_remote(repo_url, sort='-v:refname', tags=True)
-        remoteVersion = blob.split('\n')[0].split('/')[-1];
-        # remove ^{} from the end
-        remoteVersion = Base.rchop(remoteVersion, '^{}')
+        if remote == '' and not available:
+            print('Could not reach remote — check your network connection.')
+            sys.exit(1)
 
-        version = Base.getVersion()
-        
-        if remoteVersion != version:
-            print('local version ' + version + ' new version ' + remoteVersion)
-            return True
+        if not available:
+            print('You are up-to-date (' + local + ').')
+            return
 
-        return False
-
-    def getRepo(self):
-        blnVerbose = False
-        sourceBranch = 'develop'
-
-        if (os.path.exists(".git") == False):
-            print(".git not found.")
-            exit(0)
-
-        repo = git.Repo(search_parent_directories=True)
-        branch = repo.active_branch
-
-        if branch.name == sourceBranch:
-            if blnVerbose:
-                print(branch.name)
-        else:
-            print('no ' + sourceBranch + ' branch found' +  ' but ' + branch.name)
-            exit(0)
-
-        if repo.untracked_files:
-            print(sourceBranch + ' branch has untracked files')
-            exit(0)
-
-        # if repo.is_dirty():
-        #     print(sourceBranch + ' branch has uncommitted files')
-        #     exit(0)
-        
-        return repo
+        print('Updating ' + local + ' -> ' + remote)
+        if not updater.runUpdate():
+            sys.exit(1)
+        print('Updated to ' + Base.getVersion() + '.')
