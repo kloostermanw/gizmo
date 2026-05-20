@@ -1,0 +1,11 @@
+[DEFAULT]
+# mode: how the background update check behaves on each gizmo invocation.
+#   auto      - pull silently when an update is available
+#   reminder  - print a notice telling the user to run gizmo update:now
+#   prompt    - ask the user [Y/n] interactively (falls back to reminder when not a TTY)
+#   disabled  - skip the background check entirely
+mode = reminder
+
+# frequency: days between background remote probes. The first invocation
+# after this many days will hit the network; intermediate invocations are silent.
+frequency = 7
