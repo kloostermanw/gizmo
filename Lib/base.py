@@ -25,5 +25,33 @@ class Base():
         version = ''
         with open(baseDir + '/../VERSION') as f:
             version = f.readline().strip('\n')
-        
+
         return version
+
+    @staticmethod
+    def parseVersion(s):
+        s = (s or '').strip()
+        if s.endswith('^{}'):
+            s = s[:-3]
+        if s.startswith('v') or s.startswith('V'):
+            s = s[1:]
+        parts = s.split('.')
+        out = []
+        for p in parts[:3]:
+            try:
+                out.append(int(p))
+            except ValueError:
+                out.append(-1)
+        while len(out) < 3:
+            out.append(0)
+        return tuple(out)
+
+    @staticmethod
+    def compareVersions(a, b):
+        pa = Base.parseVersion(a)
+        pb = Base.parseVersion(b)
+        if pa < pb:
+            return -1
+        if pa > pb:
+            return 1
+        return 0

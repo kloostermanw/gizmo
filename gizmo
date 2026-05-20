@@ -18,6 +18,17 @@ args = sys.argv[1:]
 list = []
 blnFound = False
 
+# Background update check — skip for update:* commands (no point checking
+# right before the user runs an update command anyway). Wrapped so it can
+# never break command dispatch.
+try:
+    invoked = args[0] if args else ''
+    if not invoked.startswith('update:'):
+        from Lib.updater import Updater
+        Updater(baseDir).maybeRunBackgroundCheck()
+except Exception:
+    pass
+
 # Find commands / modules in the Commands directory.
 modules = glob.glob(join(baseDir + "/Commands", "*.py"))
 __all__ = [ basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__init__.py') and not f.endswith('command.py')]
