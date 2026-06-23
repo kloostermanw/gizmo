@@ -45,9 +45,9 @@ class Command:
 
         return config;
 
-    def runCommand(self, strCmd, strArgs):
+    def runCommand(self, strCmd, strArgs, cwd=None):
         arrCmdAndArgs = []
-        
+
         if type(strArgs) is list:
             arrCmdAndArgs = strArgs
         else:
@@ -60,7 +60,8 @@ class Command:
                             shell=False,
                             stdout=PIPE,
                             stderr=PIPE,
-                            check=False)
+                            check=False,
+                            cwd=cwd)
 
             return result.stderr.decode("utf-8")
 

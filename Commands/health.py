@@ -1,5 +1,6 @@
 from Commands.command import Command
 import configparser
+import os
 from subprocess import call
 import git
 
@@ -19,7 +20,7 @@ class Health(Command):
         
         for r in list:
             a = self.gitCheck(r, default.get(r));
-            b = self.composerCheck(r, default.get('vagrant.' + r));
+            b = self.composerCheck(r, default.get('vagrant.' + r), default.get('vagrant_dir.' + r));
 
             if (a != None):
                 if (header != r):
@@ -52,10 +53,15 @@ class Health(Command):
         if (behind != "0"):
             return "is " + behind + " commits behind."
 
-    def composerCheck(self, r, dir):
-        if dir != None:
-            hostname = 'pg.celery.loc'
-            args = [hostname, "cd " + dir + "; composer install --dry-run"]
-            output = self.runCommand('ssh', args);
-            if not "Nothing to install" in output:
-                return "you need to run composer install."
+    def composerCheck(self, r, boxPath, vagrantDir):
+        if boxPath is None or vagrantDir is None:
+            return None
+
+        cwd = os.path.expanduser(vagrantDir)
+        args = ['ssh', '-c', "cd " + boxPath + "; composer install --dry-run"]
+        output = self.runCommand('vagrant', args, cwd=cwd);
+
+        if "must be running" in output:
+            return "vagrant is down, run `vagrant up`."
+        if not "Nothing to install" in output:
+            return "you need to run composer install."

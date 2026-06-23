@@ -3,6 +3,8 @@
 #
 [DEFAULT]
 list = web-app,web-api,avatar,my,developers,cp
+
+# local repo directory (git check runs here)
 web-app = ~/repos/celery-web-app
 web-api = ~/repos/celery-web-api
 avatar = ~/repos/celery-avatar
@@ -10,9 +12,18 @@ my = ~/repos/celery-my
 developers = ~/repos/celery-developers-website
 cp = ~/repos/celery-control-panel
 
+# repo directory inside the vagrant box (where composer install runs)
 vagrant.web-app = /var/www/vhosts/application/src
 vagrant.web-api = /var/www/vhosts/api/src
 vagrant.avatar = /var/www/vhosts/avatar/src
 vagrant.my = /var/www/vhosts/my-celery/src
 vagrant.cp = /var/www/vhosts/control-panel/src
 vagrant.developers = /var/www/vhosts/developers/src
+
+# host directory containing the Vagrantfile (where `vagrant ssh` is run from)
+vagrant_dir.web-app = ~/repos/celery-web-app
+vagrant_dir.web-api = ~/repos/celery-web-app
+vagrant_dir.avatar = ~/repos/celery-web-app
+vagrant_dir.my = ~/repos/celery-web-app
+vagrant_dir.cp = ~/repos/celery-web-app
+vagrant_dir.developers = ~/repos/celery-web-app
