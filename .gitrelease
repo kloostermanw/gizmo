@@ -21,7 +21,7 @@ editor = none
 cmd1_filename = VERSION
 
 # cmd1_commit_message
-cmd1_commit_message = none
+cmd1_commit_message = new-version
 
 # cmd2 that runs after cmd1
 # cmd2 = none
