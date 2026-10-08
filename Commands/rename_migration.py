@@ -20,6 +20,10 @@ class RenameMigration(Command):
         fout.write(data)
         fout.close()
 
+    def stageFile(self, repo, file):
+        # Use the git CLI: GitPython's index reader only supports index versions 1 and 2.
+        repo.git.add(file)
+
     def handle(self, args):
         # Check if current directory is a git repo
         if (os.path.exists(".git") == False):
@@ -116,7 +120,7 @@ class RenameMigration(Command):
         self.rename(file2, className1, className2)
 
         # Add file2 to git
-        repo.index.add(file2)
+        self.stageFile(repo, file2)
 
         # Create Fixup commit, for the
         repo.git.commit('--fixup', hash, "--no-verify")
