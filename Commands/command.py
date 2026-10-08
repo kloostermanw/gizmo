@@ -59,11 +59,11 @@ class Command:
             result = run(arrCmdAndArgs,
                             shell=False,
                             stdout=PIPE,
-                            stderr=PIPE,
+                            stderr=STDOUT,
                             check=False,
                             cwd=cwd)
 
-            return result.stderr.decode("utf-8")
+            return result.stdout.decode("utf-8")
 
     # To ensure the command outputs real-time to the terminal exactly as if you ran it manually
     def runCmdRealTime(self, strCmd, strArgs):
