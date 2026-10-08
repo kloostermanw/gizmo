@@ -1,0 +1,18 @@
+# This file will be overwritten with an update.
+# Create conf in this directory for your own settings.
+#
+# Configure the repositories the `branches` command can inspect.
+# Used when running `gizmo branches` outside a git repo (interactive
+# selection) and by `gizmo branches --all` (every repo in the list).
+#
+# Follow the same format as the health config: a comma-separated `list`
+# of names, plus a `<name> = <path>` entry per repository. Paths may use
+# `~` for your home directory.
+#
+#   [DEFAULT]
+#   list = web-app,web-api
+#   web-app = ~/repos/celery-web-app
+#   web-api = ~/repos/celery-web-api
+#
+[DEFAULT]
+list =

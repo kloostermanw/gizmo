@@ -2,6 +2,7 @@ from Commands.command import Command
 from Lib.termcolor import colored
 import git
 import json
+import os
 import re
 import subprocess
 
@@ -10,12 +11,87 @@ class Branches(Command):
     def configure(self):
         self.name = "branches";
         self.description = "show local branches with GitHub issue/PR status.";
+        self.config = "branches";
+
+    def hasAllFlag(self, args):
+        return '--all' in args
+
+    def buildRepoMap(self, config):
+        default = config['DEFAULT']
+        raw = default.get('list', '')
+        repo_map = {}
+        if not raw:
+            return repo_map
+        for name in raw.split(','):
+            name = name.strip()
+            if not name:
+                continue
+            path = default.get(name)
+            if not path:
+                continue
+            repo_map[name] = os.path.expanduser(path.strip())
+        return repo_map
+
+    def printEmptyListMessage(self):
+        print('No repositories configured.')
+        print('Add repositories to ' + colored('config/branches/conf', 'yellow') +
+              ' to use this feature.')
+        print('See config/branches/conf.default for the expected format.')
+
+    def promptForRepo(self, repo_map):
+        from simple_term_menu import TerminalMenu
+
+        names = list(repo_map.keys())
+        menu = TerminalMenu(names, title='Select a repository:')
+        index = menu.show()
+        if index is None:
+            return None, None
+        name = names[index]
+        return name, repo_map[name]
 
     def handle(self, args):
-        repo = git.Repo(search_parent_directories=True)
+        if self.hasAllFlag(args):
+            repo_map = self.buildRepoMap(self.getConfig())
+            if not repo_map:
+                self.printEmptyListMessage()
+                return
+            for name, path in repo_map.items():
+                print(colored(name, 'yellow'))
+                self.reportRepoSafely(path)
+                print()
+            return
+
+        try:
+            self.reportRepo()
+        except git.InvalidGitRepositoryError:
+            repo_map = self.buildRepoMap(self.getConfig())
+            if not repo_map:
+                self.printEmptyListMessage()
+                return
+            name, path = self.promptForRepo(repo_map)
+            if not path:
+                return
+            print(colored(name, 'yellow'))
+            self.reportRepoSafely(path)
+
+    def reportRepoSafely(self, path):
+        try:
+            self.reportRepo(path)
+        except git.InvalidGitRepositoryError:
+            print('  ' + colored('not a git repository: ' + path, 'red'))
+        except git.NoSuchPathError:
+            print('  ' + colored('path does not exist: ' + path, 'red'))
+
+    def reportRepo(self, repo_path=None):
+        if repo_path:
+            repo = git.Repo(repo_path, search_parent_directories=True)
+        else:
+            repo = git.Repo(search_parent_directories=True)
+
+        cwd = repo.working_tree_dir
         branches = sorted([h.name for h in repo.heads])
 
-        prs = self.fetchPRs()
+        prs = self.fetchPRs(cwd)
         pr_by_branch = {}
         for pr in prs:
             pr_by_branch[pr['headRefName']] = pr
@@ -32,7 +108,7 @@ class Branches(Command):
 
             if match:
                 issue_number = match.group(1)
-                issue = self.fetchIssue(issue_number)
+                issue = self.fetchIssue(issue_number, cwd)
                 if issue:
                     issue_state = issue.get('state', '')
                     project_name, project_status = self.extractProject(issue)
@@ -46,14 +122,14 @@ class Branches(Command):
 
             rows.append((branch, issue_state, pr_number, pr_state, reviewers, project_name, project_status))
 
-        repo_url = self.getRepoUrl()
+        repo_url = self.getRepoUrl(cwd)
         self.printTable(rows, prs, repo_url)
 
-    def fetchPRs(self):
+    def fetchPRs(self, cwd=None):
         try:
             result = subprocess.run(
                 ['gh', 'pr', 'list', '--state', 'all', '--json', 'number,headRefName,state,latestReviews,reviewRequests', '-L', '100'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, cwd=cwd
             )
             if result.returncode == 0:
                 return json.loads(result.stdout.decode('utf-8'))
@@ -61,11 +137,11 @@ class Branches(Command):
             pass
         return []
 
-    def fetchIssue(self, number):
+    def fetchIssue(self, number, cwd=None):
         try:
             result = subprocess.run(
                 ['gh', 'issue', 'view', str(number), '--json', 'state,assignees,projectItems'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, cwd=cwd
             )
             if result.returncode == 0:
                 return json.loads(result.stdout.decode('utf-8'))
@@ -130,11 +206,11 @@ class Branches(Command):
 
         return ', '.join(parts)
 
-    def getRepoUrl(self):
+    def getRepoUrl(self, cwd=None):
         try:
             result = subprocess.run(
                 ['gh', 'repo', 'view', '--json', 'url', '-q', '.url'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, cwd=cwd
             )
             if result.returncode == 0:
                 return result.stdout.decode('utf-8').strip()

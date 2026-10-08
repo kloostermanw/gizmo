@@ -45,9 +45,9 @@ class Command:
 
         return config;
 
-    def runCommand(self, strCmd, strArgs):
+    def runCommand(self, strCmd, strArgs, cwd=None):
         arrCmdAndArgs = []
-        
+
         if type(strArgs) is list:
             arrCmdAndArgs = strArgs
         else:
@@ -59,10 +59,11 @@ class Command:
             result = run(arrCmdAndArgs,
                             shell=False,
                             stdout=PIPE,
-                            stderr=PIPE,
-                            check=False)
+                            stderr=STDOUT,
+                            check=False,
+                            cwd=cwd)
 
-            return result.stderr.decode("utf-8")
+            return result.stdout.decode("utf-8")
 
     # To ensure the command outputs real-time to the terminal exactly as if you ran it manually
     def runCmdRealTime(self, strCmd, strArgs):
