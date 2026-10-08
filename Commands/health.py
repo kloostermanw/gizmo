@@ -38,8 +38,14 @@ class Health(Command):
             print('Healty, ready to rock.')
     
     def gitCheck(self, r, dir):
-        repo = git.Repo(dir, search_parent_directories=True)
-        branch = repo.active_branch
+        dir = os.path.expanduser(dir)
+
+        try:
+            repo = git.Repo(dir, search_parent_directories=True)
+        except git.exc.NoSuchPathError:
+            return "directory " + dir + " not found."
+        except git.exc.InvalidGitRepositoryError:
+            return "directory " + dir + " is not a git repository."
 
         # Fetch all remotes
         for remote in repo.remotes:
@@ -58,6 +64,9 @@ class Health(Command):
             return None
 
         cwd = os.path.expanduser(vagrantDir)
+        if not os.path.isdir(cwd):
+            return "vagrant directory " + cwd + " not found."
+
         args = ['ssh', '-c', "cd " + boxPath + "; composer install --dry-run"]
         output = self.runCommand('vagrant', args, cwd=cwd);
 
